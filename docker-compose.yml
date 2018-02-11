@@ -1,0 +1,55 @@
+version: '2'
+
+services:
+
+  code:
+    build:
+      context: .
+      dockerfile: Dockerfile-code
+    container_name: code
+    volumes:
+      - /app
+    
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    container_name: nginx
+    depends_on:
+      - php
+    ports:
+      - 5000:80
+    volumes_from:
+      - code
+    links:
+    - php:php
+    - phpmyadmin:phpmyadmin
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile-php
+    container_name: php
+    volumes_from:
+      - code
+
+  mysql:
+    image: mysql
+    container_name: db
+    ports:
+    - 3306:3306
+    volumes:
+      - /var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=fred
+      
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    ports:
+      - 8080:80
+    links:
+      - mysql:db
+
+      
+    
